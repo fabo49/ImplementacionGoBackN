@@ -1,8 +1,6 @@
 # Simulación envio de mensajes entre dos computadoras
 <p>
-Este repositorio tendrá el proyecto programado 1 del curso Investigación de Operaciones de la UCR.
-Se trata de simular la comunicación entre dos computadoras mediante el protocolo similar al de <b>Go back N</b>.
-</p>
+Este repositorio tendrá el proyecto programado 1 del curso Investigación de Operaciones de la UCR. La implementación se hizo en lenguaje C++ y se utilizó la herramienta <a href="https://www.qt.io">Qt</a> como IDE y para realizar la interfaz. Se trata de simular la comunicación entre dos computadoras mediante el protocolo similar al de <b>Go back N</b>.</p>
 <p>Los autores son:</p>
 <ul>
   <li>Fabián Rodríguez Obando</li>

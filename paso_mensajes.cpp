@@ -65,28 +65,9 @@ void Paso_Mensajes::on_btnStart_clicked()
 
 void Paso_Mensajes::correSimulacion()
 {
+    A_recibeMensaje();
     while(m_reloj < m_maxTime){
-        int evento = minDouble(m_A_recibeMensaje, m_A_seLibera, m_B_seLibera, m_B_recibeFrame, m_A_recibeACK, m_expiraTTL);
-        switch (evento){
-        case LMA:
-            A_recibeMensaje();
-            break;
-        case SLA:
-            A_seLibera();
-            break;
-        case SLB:
-            B_seLibera();
-            break;
-        case BRF:
-            B_recibeFrame();
-            break;
-        case ARACK:
-            A_recibeACK();
-            break;
-        case VTTL:
-            expiraTTL();
-            break;
-        }
+        sigEvento(m_A_recibeMensaje, m_A_seLibera, m_B_seLibera, m_B_recibeFrame, m_A_recibeACK, m_expiraTTL);
     }
 }
 
@@ -120,7 +101,7 @@ void Paso_Mensajes::B_seLibera()
 
 }
 
-int Paso_Mensajes::minDouble(double a, double b, double c,  double d, double e, double f)
+void Paso_Mensajes::sigEvento(double a, double b, double c,  double d, double e, double f)
 {
     double vecTimes[] ={a, b, c, d, e, f};
     double min = a;
@@ -133,23 +114,22 @@ int Paso_Mensajes::minDouble(double a, double b, double c,  double d, double e, 
     }
 
     if(min == a){
-        return LMA;
+        A_recibeMensaje();
     }
     if(min == b){
-        return SLA;
+        A_seLibera();
     }
     if(min == c){
-        return SLB;
+        B_seLibera();
     }
     if(min == d){
-        return BRF;
+        B_recibeFrame();
     }
     if(min == e){
-        return ARACK;
+        A_recibeACK();
     }
     if(min == f){
-        return VTTL;
+        expiraTTL();
     }
 
-    return 0;
 }

@@ -55,7 +55,7 @@ private:
     void B_recibeFrame();
     void B_seLibera();
 
-    int minDouble(double a, double b, double c, double d, double e, double f);
+    void sigEvento(double a, double b, double c, double d, double e, double f);
 
     Ui::Paso_Mensajes *ui;
 

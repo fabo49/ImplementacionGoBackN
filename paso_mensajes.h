@@ -16,6 +16,7 @@
 #include <QString>
 #include <iostream>
 #include <QDebug>
+#include <queue>
 
 #define LMA     1   //llega mensaje a A
 #define SLA     2   //se libera A
@@ -55,7 +56,7 @@ private:
     void B_recibeFrame();
     void B_seLibera();
 
-    void sigEvento(double a, double b, double c, double d, double e, double f);
+    void sigEvento();
 
     Ui::Paso_Mensajes *ui;
 
@@ -72,6 +73,11 @@ private:
     double m_expiraTTL;
     double m_B_recibeFrame;
     double m_B_seLibera;
+
+    std::queue<QString> colaA;
+    std::queue<frame> colaB;
+
+    QString ventanaMensajes[8];
 
 
 };

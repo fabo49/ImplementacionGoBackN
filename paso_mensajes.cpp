@@ -67,12 +67,13 @@ void Paso_Mensajes::correSimulacion()
 {
     A_recibeMensaje();
     while(m_reloj < m_maxTime){
-        sigEvento(m_A_recibeMensaje, m_A_seLibera, m_B_seLibera, m_B_recibeFrame, m_A_recibeACK, m_expiraTTL);
+        sigEvento();
     }
 }
 
 void Paso_Mensajes::A_recibeMensaje()
 {
+    m_reloj = m_A_recibeMensaje;
 
 }
 
@@ -101,10 +102,10 @@ void Paso_Mensajes::B_seLibera()
 
 }
 
-void Paso_Mensajes::sigEvento(double a, double b, double c,  double d, double e, double f)
+void Paso_Mensajes::sigEvento()
 {
-    double vecTimes[] ={a, b, c, d, e, f};
-    double min = a;
+    double vecTimes[] ={m_A_recibeMensaje, m_A_seLibera, m_B_seLibera, m_B_recibeFrame, m_A_recibeACK, m_expiraTTL};
+    double min = m_A_recibeMensaje;
     for(int i=0; i<6; ++i){
         for(int j=i+1; j<6; ++j){
             if(vecTimes[j]<min){
@@ -113,22 +114,22 @@ void Paso_Mensajes::sigEvento(double a, double b, double c,  double d, double e,
         }
     }
 
-    if(min == a){
+    if(min == m_A_recibeMensaje){
         A_recibeMensaje();
     }
-    if(min == b){
+    if(min == m_A_seLibera){
         A_seLibera();
     }
-    if(min == c){
+    if(min == m_B_seLibera){
         B_seLibera();
     }
-    if(min == d){
+    if(min == m_B_recibeFrame){
         B_recibeFrame();
     }
-    if(min == e){
+    if(min == m_A_recibeACK){
         A_recibeACK();
     }
-    if(min == f){
+    if(min == m_expiraTTL){
         expiraTTL();
     }
 

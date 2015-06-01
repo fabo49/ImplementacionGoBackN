@@ -22,6 +22,11 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
     m_timer = 0.0;
     m_modoLento = false;
     m_reloj = 0.0;
+
+    A_Ocupado = false;
+    B_Ocupado = false;
+
+    numMensajes = 0;
 }
 
 Paso_Mensajes::~Paso_Mensajes()
@@ -74,6 +79,29 @@ void Paso_Mensajes::correSimulacion()
 void Paso_Mensajes::A_recibeMensaje()
 {
     m_reloj = m_A_recibeMensaje;
+    ++numMensajes;
+
+    if(ventanaMensajes.size() == 8){    //la ventana esta llena
+        colaA.push(numMensajes);        //guarda el mensaje en la cola
+    }else{
+        if(A_Ocupado == true){
+            ventanaMensajes.push(numMensajes);
+        }else{
+            std::default_random_engine generador;
+            std::exponential_distribution<double> distribucion(0.5);
+
+            A_Ocupado = true;
+            ventanaMensajes.push(numMensajes);
+            mensajeActual = ventanaMensajes.front();
+            ventanaMensajes.pop();
+            double varAleatoria = distribucion(generador);  //crea la variable aleatoria con dist. exponencial, parametro 1/2
+            m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
+        }
+    }
+    std::default_random_engine generador;
+    std::normal_distribution<double> distribucion(25.0, 1.0);
+    double varAleatoria = distribucion(generador);  //genera la variable aleatoria con dist. normal, media:25 desviacion estandar: 1
+    m_A_recibeMensaje = m_reloj + varAleatoria;     //programa cuando va a arribar el siguiente mensaje
 
 }
 

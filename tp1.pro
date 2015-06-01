@@ -18,3 +18,5 @@ SOURCES += main.cpp\
 HEADERS  += paso_mensajes.h
 
 FORMS    += paso_mensajes.ui
+
+CONFIG += c++11

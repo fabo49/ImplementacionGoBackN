@@ -13,21 +13,13 @@
 #define PASO_MENSAJES_H
 
 #include <QMainWindow>
-#include <QString>
 #include <iostream>
 #include <QDebug>
 #include <queue>
-
-#define LMA     1   //llega mensaje a A
-#define SLA     2   //se libera A
-#define SLB     3   //se libera B
-#define BRF     4   //B recibe frame
-#define ARACK   5   //A recibe ACK
-#define VTTL    6   //vence time to live
+#include <random>
 
 struct frame{
     bool error;
-    QString mensaje;
     int numSecuencia;
 };
 
@@ -74,11 +66,15 @@ private:
     double m_B_recibeFrame;
     double m_B_seLibera;
 
-    std::queue<QString> colaA;
+    std::queue<int> colaA;
     std::queue<frame> colaB;
 
-    QString ventanaMensajes[8];
+    std::queue<int> ventanaMensajes;
 
+    bool A_Ocupado;
+    bool B_Ocupado;
+    int numMensajes;
+    int mensajeActual;
 
 };
 

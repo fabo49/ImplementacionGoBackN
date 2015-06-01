@@ -46,18 +46,20 @@ void Paso_Mensajes::on_btnStart_clicked()
                //llega aca significa que los campos necesarios estaban llenos
                m_timer = tempStr.toDouble(&ok);
                m_modoLento = ui->checkBox->isChecked();
+               ui->checkBox->setEnabled(false);
                ui->lineMaxTime->setEnabled(false);
                ui->lineTimer->setEnabled(false);
                ui->lineNumVeces->setEnabled(false);
-               qDebug("Los datos necesarios estan llenos");
+               ui->resultadosFinales->setText("Los datos necesarios estan llenos, vamos a empezar la simulación.");
+               correSimulacion();
            }else{
-               qDebug("No encontro nada en timer");
+               ui->resultadosFinales->setText("No se asignó un timer.");
            }
        }else{
-           qDebug("no encontro nada en maxTime");
+           ui->resultadosFinales->setText("No se asignó un máximo de tiempo.");
        }
    }else{
-       qDebug("No encontro nada en numVeces");
+       ui->resultadosFinales->setText("No se asigno el número de veces a correr.");
    }
 }
 

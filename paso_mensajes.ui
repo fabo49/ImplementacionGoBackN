@@ -125,7 +125,7 @@
       <item>
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>Reloj del sistem:</string>
+         <string>Reloj del sistema:</string>
         </property>
        </widget>
       </item>
@@ -185,7 +185,7 @@
       <item>
        <widget class="QLabel" name="label_7">
         <property name="text">
-         <string>Resultados finales</string>
+         <string>Mensajes Importantes</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

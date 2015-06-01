@@ -51,6 +51,7 @@ private:
     bool m_modoLento;
     double m_reloj;
 
+
 };
 
 #endif // PASO_MENSAJES_H

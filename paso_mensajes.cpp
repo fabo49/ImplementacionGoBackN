@@ -65,7 +65,7 @@ void Paso_Mensajes::on_btnStart_clicked()
 
 void Paso_Mensajes::correSimulacion()
 {
-
+//Se va empezar a implementar
 }
 
 void Paso_Mensajes::A_recibeMensaje()

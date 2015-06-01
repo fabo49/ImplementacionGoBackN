@@ -60,3 +60,38 @@ void Paso_Mensajes::on_btnStart_clicked()
        qDebug("No encontro nada en numVeces");
    }
 }
+
+void Paso_Mensajes::correSimulacion()
+{
+
+}
+
+void Paso_Mensajes::A_recibeMensaje()
+{
+
+}
+
+void Paso_Mensajes::A_seLibera()
+{
+
+}
+
+void Paso_Mensajes::A_recibeACK()
+{
+
+}
+
+void Paso_Mensajes::expiraTTL()
+{
+
+}
+
+void Paso_Mensajes::B_recibeFrame()
+{
+
+}
+
+void Paso_Mensajes::B_seLibera()
+{
+
+}

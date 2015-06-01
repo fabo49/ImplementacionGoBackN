@@ -22,6 +22,7 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
     m_timer = 0.0;
     m_modoLento = false;
     m_reloj = 0.0;
+    m_indiceVeces = 0;
 
     A_Ocupado = false;
     B_Ocupado = false;
@@ -71,14 +72,16 @@ void Paso_Mensajes::on_btnStart_clicked()
 void Paso_Mensajes::correSimulacion()
 {
     A_recibeMensaje();
-    while(m_reloj < m_maxTime){
+    ++m_indiceVeces;
+    while(m_reloj < m_maxTime && m_indiceVeces < m_numVeces){
         sigEvento();
+        ++m_indiceVeces;
     }
 }
 
 void Paso_Mensajes::A_recibeMensaje()
 {
-    m_reloj = m_A_recibeMensaje;
+    m_reloj = m_A_recibeMensaje;    //R=LMA
     ++numMensajes;
 
     if(ventanaMensajes.size() == 8){    //la ventana esta llena
@@ -102,12 +105,37 @@ void Paso_Mensajes::A_recibeMensaje()
     std::normal_distribution<double> distribucion(25.0, 1.0);
     double varAleatoria = distribucion(generador);  //genera la variable aleatoria con dist. normal, media:25 desviacion estandar: 1
     m_A_recibeMensaje = m_reloj + varAleatoria;     //programa cuando va a arribar el siguiente mensaje
-
+    QString reloj = QString::number(m_reloj);
+    ui->labelReloj->setText(reloj);  //indica en la interfaz cual es el reloj
 }
 
 void Paso_Mensajes::A_seLibera()
 {
+    m_reloj = m_A_seLibera; //R = SLA
+    m_B_recibeFrame = m_reloj + 1;
+    //venceTimer = m_reloj + m_timer
 
+    frame newFrame;
+    newFrame.numSecuencia = mensajeActual;
+    std::default_random_engine generador1;
+    std::uniform_int_distribution<int> distribucion1(1,100);
+    int numero = distribucion1(generador1);
+    if(numero < 10){        //probabilidad 0.1 de que el mensaje vaya con error
+        newFrame.error = true;
+    }else{
+        newFrame.error = false;
+    }
+
+    std::default_random_engine generador2;
+    std::uniform_int_distribution<int> distribucion2(1, 100);
+    numero = distribucion2(generador2);
+    if(numero <5){      //probabilidad de 0.05 de que el mensaje se pierda
+
+    }else{
+        //programa el evento B_recibeFrame
+        m_B_recibeFrame = m_reloj + 1;  //BRF = R+1
+    }
+    //luego hay que revisar si hay algo en cola
 }
 
 void Paso_Mensajes::A_recibeACK()

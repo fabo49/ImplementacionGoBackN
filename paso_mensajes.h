@@ -20,7 +20,7 @@
 
 struct frame{
     bool error;
-    int numSecuencia;
+    int numSecuencia;   //va a ser el mismo que le mensaje
 };
 
 namespace Ui {
@@ -54,6 +54,7 @@ private:
 
     // Miembros de la clase
     int m_numVeces;
+    int m_indiceVeces;
     double m_maxTime;
     double m_timer;
     bool m_modoLento;

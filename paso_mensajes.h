@@ -17,6 +17,19 @@
 #include <iostream>
 #include <QDebug>
 
+#define LMA     1   //llega mensaje a A
+#define SLA     2   //se libera A
+#define SLB     3   //se libera B
+#define BRF     4   //B recibe frame
+#define ARACK   5   //A recibe ACK
+#define VTTL    6   //vence time to live
+
+struct frame{
+    bool error;
+    QString mensaje;
+    int numSecuencia;
+};
+
 namespace Ui {
 class Paso_Mensajes;
 }
@@ -42,6 +55,8 @@ private:
     void B_recibeFrame();
     void B_seLibera();
 
+    int minDouble(double a, double b, double c, double d, double e, double f);
+
     Ui::Paso_Mensajes *ui;
 
     // Miembros de la clase
@@ -50,6 +65,13 @@ private:
     double m_timer;
     bool m_modoLento;
     double m_reloj;
+
+    double m_A_recibeMensaje;
+    double m_A_seLibera;
+    double m_A_recibeACK;
+    double m_expiraTTL;
+    double m_B_recibeFrame;
+    double m_B_seLibera;
 
 
 };

@@ -38,7 +38,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineNumVeces"/>
+       <widget class="QLineEdit" name="lineNumVeces">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -65,7 +69,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineMaxTime"/>
+       <widget class="QLineEdit" name="lineMaxTime">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -92,7 +100,11 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLineEdit" name="lineTimer"/>
+       <widget class="QLineEdit" name="lineTimer">
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

@@ -16,7 +16,6 @@
 #include <QString>
 #include <iostream>
 #include <QDebug>
-#include "eventos.h"
 
 namespace Ui {
 class Paso_Mensajes;
@@ -34,6 +33,15 @@ private slots:
     void on_btnStart_clicked();
 
 private:
+
+    void correSimulacion();
+    void A_recibeMensaje();
+    void A_seLibera();
+    void A_recibeACK();
+    void expiraTTL();
+    void B_recibeFrame();
+    void B_seLibera();
+
     Ui::Paso_Mensajes *ui;
 
     // Miembros de la clase

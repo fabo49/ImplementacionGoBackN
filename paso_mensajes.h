@@ -16,12 +16,24 @@
 #include <iostream>
 #include <QDebug>
 #include <queue>
-#include <random>
+#include <QThread>
+#include <QString>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
+#include <math.h>
+
 
 struct frame{
     bool error;
     int numSecuencia;   //va a ser el mismo que le mensaje
 };
+
+struct mensaje{
+    bool seEnvio;
+    int numSecuencia;
+    double venceTimer;
+};
+
 
 namespace Ui {
 class Paso_Mensajes;
@@ -39,7 +51,6 @@ private slots:
     void on_btnStart_clicked();
 
 private:
-
     void correSimulacion();
     void A_recibeMensaje();
     void A_seLibera();
@@ -54,11 +65,9 @@ private:
 
     // Miembros de la clase
     int m_numVeces;
-    int m_indiceVeces;
     double m_maxTime;
     double m_timer;
     bool m_modoLento;
-    double m_reloj;
 
     double m_A_recibeMensaje;
     double m_A_seLibera;
@@ -67,15 +76,27 @@ private:
     double m_B_recibeFrame;
     double m_B_seLibera;
 
-    std::queue<int> colaA;
+    std::queue<mensaje> colaA;
     std::queue<frame> colaB;
-
-    std::queue<int> ventanaMensajes;
 
     bool A_Ocupado;
     bool B_Ocupado;
     int numMensajes;
     int mensajeActual;
+
+    int ACK;
+
+    double infinity;
+
+    //Estadisticas
+
+    double m_reloj;
+    QString m_ultimoACKA;
+    int m_totFramesB;
+    QString m_eventoCorriendo;
+    int m_longColaA;
+    QString m_datosCPUB;
+    int m_recibidosCorrectosB;
 
 };
 

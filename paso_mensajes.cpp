@@ -33,7 +33,7 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
     m_datosCPUB = "";
     m_recibidosCorrectosB = 0;
 
-    numMensajes = 0;
+    numMensajes = 1;
 
     infinity = INFINITY;    // Se toma como infinito
 
@@ -103,22 +103,26 @@ void Paso_Mensajes::A_recibeMensaje()
 {
     mensaje newMensaje;
     m_reloj = m_A_recibeMensaje;    //R=LMA
-    ++numMensajes;
-    while(colaA.size()<8){
-        newMensaje.numSecuencia = numMensaje;
+    m_expiraTTL = m_reloj + m_timer;    //** OJO CON ESTO **
+    colaTimer.push_back(m_expiraTTL);   //** PREGUNTAR A LA PROFE SI SE HACE ACA **
+    while(ventana.size()<8){    //Hay campo en la ventana?
+        newMensaje.numSecuencia = numMensajes;
         newMensaje.seEnvio = true;
-        colaA.push(numMensajes);
-        if(A_Ocupado == false){     //preparaFrame() esta libre
+        newMensaje.venceTimer = m_expiraTTL;
+        ventana.push_back(newMensaje);
+        if(A_Ocupado == false){     //preparaFrame() esta libre?
             A_Ocupado = true;
             srand(time(NULL));
             double num = rand()/RAND_MAX;   //numero entre 0-1
             double varAleatoria = -(1/0.5)*(log(1-num)); //crea la variable aleatoria con dist. exponencial, parametro 1/2
-            mensajeActual = colaA.front();
+            mensaje msjTmp = ventana.front();
+            mensajeActual = msjTmp.numSecuencia;
             m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
         }
+        ++numMensajes;
     }
     if(colaA.size() >= 8){  //si ya no hay campo en la ventana
-        colaA.push(numMensajes);
+        colaA.push_back(numMensajes);
     }
     ui->resultA->setText("Mensajes recibidos: "+QString::number(colaA.size()));
     QString mensajeTmp = "Mensajes recibidos: "+QString::number(colaA.size());
@@ -140,7 +144,6 @@ void Paso_Mensajes::A_seLibera()
     m_reloj = m_A_seLibera; //R = SLA
     qDebug()<<"El reloj actual es: "+QString::number(m_reloj);
     m_B_recibeFrame = m_reloj + 1;
-    m_expiraTTL = m_reloj + m_timer;
 
     frame newFrame;
     newFrame.numSecuencia = mensajeActual;
@@ -156,15 +159,14 @@ void Paso_Mensajes::A_seLibera()
     }else{
         //programa el evento B_recibeFrame
         m_B_recibeFrame = m_reloj + 1;  //BRF = R+1
-        colaB.push(newFrame);   //"lo pone en linea"
+        colaB.push_back(newFrame);   //"lo pone en linea"
     }
-    //luego hay que revisar si hay algo en cola
-    if(!colaA.empty()){
-        std::default_random_engine generador;
-        std::exponential_distribution<double> distribucion(0.5);
+    //luego hay que revisar si hay algo en la ventana
+    if(!ventana.empty()){
         srand(time(NULL));
         int r = rand()/RAND_MAX;        //numero entre 0-1
         double varAleatoria = (-1/0.5)*log(1-r);  //crea la variable aleatoria con dist. exponencial, parametro 1/2
+        ++mensajeActual;
         m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
     }else{
         A_Ocupado = false;
@@ -175,18 +177,35 @@ void Paso_Mensajes::A_seLibera()
 
 void Paso_Mensajes::A_recibeACK()
 {
+    m_reloj = m_A_recibeACK;
+    mensaje mensajeTmp = ventana.front();
+    int count = 0;
+    while(ACK-1 >= mensajeTmp.numSecuencia && !ventana.empty()){
+        ventana.erase(ventana.begin());
+        mensajeTmp = ventana.front();
+        colaTimer.erase(colaTimer.begin());
+        ++count;
+    }
+    for(int i=0; i<count; ++i){
 
+    }
+    m_A_recibeACK = infinity;
 }
 
 void Paso_Mensajes::expiraTTL()
 {
+    m_reloj = m_expiraTTL;
+    mensaje mensajeTmp = ventana.front();
+    if(mensajeTmp.venceTimer == colaTimer.front()){
+
+    }
 
 }
 
 void Paso_Mensajes::B_recibeFrame()
 {
     m_reloj = m_B_recibeFrame;
-    if(!B_Ocupado){ //el proceso esta libre
+    if(!B_Ocupado){ //el proceso esta libre -- ademas preguntar si la cola de B esta vacia
         B_Ocupado = true;
         srand (time(NULL));
         double aleat = rand() % 2 + 2;  //numero 2<=x<=3

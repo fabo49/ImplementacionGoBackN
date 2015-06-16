@@ -15,7 +15,7 @@
 #include <QMainWindow>
 #include <iostream>
 #include <QDebug>
-#include <queue>
+#include <vector>
 #include <QThread>
 #include <QString>
 #include <stdlib.h>     /* srand, rand */
@@ -76,8 +76,10 @@ private:
     double m_B_recibeFrame;
     double m_B_seLibera;
 
-    std::queue<mensaje> colaA;
-    std::queue<frame> colaB;
+    std::vector<mensaje> colaA;
+    std::vector<mensaje> ventana;
+    std::vector<frame> colaB;
+    std::vector<double> colaTimer;
 
     bool A_Ocupado;
     bool B_Ocupado;

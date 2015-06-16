@@ -103,11 +103,11 @@ void Paso_Mensajes::A_recibeMensaje()
 {
     mensaje newMensaje;
     m_reloj = m_A_recibeMensaje;    //R=LMA
-    m_expiraTTL = m_reloj + m_timer;    //** OJO CON ESTO **
-    colaTimer.push_back(m_expiraTTL);   //** PREGUNTAR A LA PROFE SI SE HACE ACA **
+    m_expiraTTL = m_reloj + m_timer;
+    colaTimer.push_back(m_expiraTTL);
     while(ventana.size()<8){    //Hay campo en la ventana?
         newMensaje.numSecuencia = numMensajes;
-        newMensaje.seEnvio = true;
+        newMensaje.seEnvio = false;
         newMensaje.venceTimer = m_expiraTTL;
         ventana.push_back(newMensaje);
         if(A_Ocupado == false){     //preparaFrame() esta libre?
@@ -122,7 +122,10 @@ void Paso_Mensajes::A_recibeMensaje()
         ++numMensajes;
     }
     if(colaA.size() >= 8){  //si ya no hay campo en la ventana
-        colaA.push_back(numMensajes);
+        newMensaje.numSecuencia = numMensajes;
+        newMensaje.seEnvio = false;
+        colaA.push_back(newMensaje);
+        ++numMensajes;
     }
     ui->resultA->setText("Mensajes recibidos: "+QString::number(colaA.size()));
     QString mensajeTmp = "Mensajes recibidos: "+QString::number(colaA.size());
@@ -146,7 +149,11 @@ void Paso_Mensajes::A_seLibera()
     m_B_recibeFrame = m_reloj + 1;
 
     frame newFrame;
-    newFrame.numSecuencia = mensajeActual;
+    mensaje msjTemp = ventana.front();
+    msjTemp.seEnvio = true;
+    ventana.erase(ventana.begin());
+    ventana.insert(ventana.begin(), msjTemp);
+    newFrame.numSecuencia = msjTemp.numSecuencia;
     srand(time(NULL));
     if((rand()%100+1) <= 10){        //probabilidad 0.1 de que el mensaje vaya con error
         newFrame.error = true;
@@ -180,14 +187,21 @@ void Paso_Mensajes::A_recibeACK()
     m_reloj = m_A_recibeACK;
     mensaje mensajeTmp = ventana.front();
     int count = 0;
-    while(ACK-1 >= mensajeTmp.numSecuencia && !ventana.empty()){
+    while(ACK > mensajeTmp.numSecuencia && !ventana.empty()){
         ventana.erase(ventana.begin());
         mensajeTmp = ventana.front();
         colaTimer.erase(colaTimer.begin());
+        colaB.erase(colaB.begin());
         ++count;
+        m_expiraTTL = colaTimer.front();
     }
     for(int i=0; i<count; ++i){
-
+        mensaje msjTemp = colaA.front();
+        msjTemp.venceTimer = m_reloj + m_timer;
+        colaTimer.push_back(m_reloj+m_timer);
+        msjTemp.seEnvio = true;
+        ventana.push_back(colaA.front());
+        colaA.erase(colaA.begin());
     }
     m_A_recibeACK = infinity;
 }
@@ -205,7 +219,7 @@ void Paso_Mensajes::expiraTTL()
 void Paso_Mensajes::B_recibeFrame()
 {
     m_reloj = m_B_recibeFrame;
-    if(!B_Ocupado){ //el proceso esta libre -- ademas preguntar si la cola de B esta vacia
+    if(!B_Ocupado && !colaB.empty()){ //el proceso esta libre -- ademas preguntar si la cola de B esta vacia
         B_Ocupado = true;
         srand (time(NULL));
         double aleat = rand() % 2 + 2;  //numero 2<=x<=3
@@ -223,22 +237,23 @@ void Paso_Mensajes::B_seLibera()
 {
     m_reloj = m_B_seLibera;
     m_datosCPUB += "Ultimo ACK enviado por B --> ";
-    if(colaB.front().numSecuencia == mensajeActual){    //es el que corresponde?
-        if(colaB.front().error){    //viene con error?
-            ACK = colaB.front().numSecuencia;
+    frame frame_tmp = colaB.front();
+    if(frame_tmp.numSecuencia == mensajeActual){    //es el que corresponde?
+        if(frame_tmp.error){    //viene con error?
+            ACK = frame_tmp.numSecuencia;
             m_datosCPUB += ACK+'\n';
-            colaB.pop();
+            colaB.erase(colaB.begin());
         }else{
-            ACK = colaB.front().numSecuencia+1;
+            ACK = frame_tmp.numSecuencia+1;
             ++m_recibidosCorrectosB;
             m_datosCPUB += ACK+'\n';
             ui->resultB->setText("Total de frames recibidos correctamente: "+QString::number(m_recibidosCorrectosB)+'\n');
-            colaB.pop();
+            colaB.erase(colaB.begin());
         }
     }else{
         ACK = mensajeActual;
         m_datosCPUB += ACK+'\n';
-        colaB.pop();
+        colaB.erase(colaB.begin());
     }
     ui->resultB->setText(m_datosCPUB);
     m_A_recibeACK = m_reloj + 1;

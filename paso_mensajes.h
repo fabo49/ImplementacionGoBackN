@@ -22,6 +22,7 @@
 #include <time.h>       /* time */
 #include <math.h>
 #include <list>
+#include <about.h>
 
 
 struct frame{
@@ -33,6 +34,8 @@ struct mensaje{
     bool seEnvio;
     int numSecuencia;
     double venceTimer;
+    double tiempoArrivo;
+    double tiempoTransmision;
 };
 
 
@@ -50,9 +53,16 @@ public:
 
 private slots:
     void on_btnStart_clicked();
+    void on_btnAbout_clicked();
+
 signals:
-    void cambiaReloj(QString newReloj);
+    void avance(int progreso);
 private:
+
+    // ------------------------------------------
+    // |        Eventos de la simulacion        |
+    // ------------------------------------------
+
     void correSimulacion();
     void A_recibeMensaje();
     void A_seLibera();
@@ -61,20 +71,29 @@ private:
     void B_recibeFrame();
     void B_seLibera();
 
-    int getMsjFaltante();
+    // ----------------------------------
+    // |        Métodos de ayuda        |
+    // ----------------------------------
 
+    int getMsjFaltante();
     void sigEvento();
+    void clear();
+
+    // --------------------------------------
+    // |        Miembros de la clase        |
+    // --------------------------------------
 
     Ui::Paso_Mensajes *ui;
+    About *vAbout;
 
-    // Miembros de la clase
+
+    // Variables que se le solicitan al usuario
     int m_numVeces;
     double m_maxTime;
     double m_timer;
     bool m_modoLento;
 
-    int totMensajesRecibidos;
-
+    // Tiempos de los eventos
     double m_A_recibeMensaje;
     double m_A_seLibera;
     double m_A_recibeACK;
@@ -82,28 +101,38 @@ private:
     double m_B_recibeFrame;
     double m_B_seLibera;
 
+    //Estructuras de datos
     std::vector<mensaje> colaA;
     std::vector<mensaje> ventana;
     std::vector<frame> colaB;
     std::vector<double> colaTimer;
+    std::vector<int> tamColaA;
+    std::vector<double> promTotalColaA;
+    std::vector<double> permanencia;
+    std::vector<double> promTotalPermanencia;
+    std::vector<double> promTransmicion;
+    std::vector<double> promTotalTransmicion;
 
+    // Variables auxiliares
     bool A_Ocupado;
     bool B_Ocupado;
     int numMensajes;
     int mensajeActual;
-
     int ACK;
 
-    //Estadisticas
+    // ------------------------------
+    // |        Estadísticas        |
+    // ------------------------------
 
+    int totMensajesRecibidos;
     double m_reloj;
-    QString m_ultimoACKA;
+    double m_relojTotal;
     int m_totFramesB;
-    QString m_eventoCorriendo;
     int m_longColaA;
-    QString m_datosCPUB;
     int m_recibidosCorrectosB;
-
+    QString datosGenerales;
+    QString m_datosCPUB;
+    QString m_datosCPUA;
 };
 
 #endif // PASO_MENSAJES_H

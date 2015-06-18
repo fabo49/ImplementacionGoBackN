@@ -13,10 +13,13 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        paso_mensajes.cpp
+        paso_mensajes.cpp \
+    about.cpp
 
-HEADERS  += paso_mensajes.h
+HEADERS  += paso_mensajes.h \
+    about.h
 
-FORMS    += paso_mensajes.ui
+FORMS    += paso_mensajes.ui \
+    about.ui
 
 CONFIG += c++11

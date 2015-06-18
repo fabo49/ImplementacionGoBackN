@@ -38,16 +38,16 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
 
     numMensajes = 1;
 
-    infinity = INFINITY;    // Se toma como infinito
-
     // El primer evento que tiene que ocurrir es "A_recibeMensaje()"
     // por lo que su tiempo se pone en 0 y los demás en "infinito".
     m_A_recibeMensaje = 0.0;
-    m_A_seLibera = infinity;
-    m_A_recibeACK = infinity;
-    m_expiraTTL = infinity;
-    m_B_recibeFrame = infinity;
-    m_B_seLibera = infinity;
+    m_A_seLibera = INFINITY;
+    m_A_recibeACK = INFINITY;
+    m_expiraTTL = INFINITY;
+    m_B_recibeFrame = INFINITY;
+    m_B_seLibera = INFINITY;
+
+    connect(this, SIGNAL(cambiaReloj(QString)),ui->labelReloj, SLOT(setText(QString)));
 
 }
 
@@ -77,6 +77,7 @@ void Paso_Mensajes::on_btnStart_clicked()
                 ui->lineMaxTime->setEnabled(false);
                 ui->lineTimer->setEnabled(false);
                 ui->lineNumVeces->setEnabled(false);
+                ui->btnStart->setEnabled(false);
                 ui->resultadosFinales->setText("Los datos necesarios estan llenos, vamos a empezar la simulación.");
                 correSimulacion();
             }else{
@@ -104,10 +105,12 @@ void Paso_Mensajes::correSimulacion()
 
 void Paso_Mensajes::A_recibeMensaje()
 {
+
+    m_reloj = m_A_recibeMensaje;    //R=LMA
+    emit cambiaReloj(QString::number(m_reloj, 'g', 4));
     mensaje newMensaje;
     newMensaje.numSecuencia = numMensajes;
     newMensaje.seEnvio = false;
-    m_reloj = m_A_recibeMensaje;    //R=LMA
     qDebug()<<"Llego un mensaje a A";
     ++totMensajesRecibidos;
     m_expiraTTL = m_reloj + m_timer;
@@ -181,11 +184,13 @@ void Paso_Mensajes::A_seLibera()
             srand(time(NULL));
             int r = (rand()%100)*0.01;        //numero entre 0-1
             double varAleatoria = (-1/0.5)*log(1-r);  //crea la variable aleatoria con dist. exponencial, parametro 1/2
-            ++mensajeActual;
+            msjTemp = ventana[quedaAlguien];
+            mensajeActual = msjTemp.numSecuencia;
+            //++mensajeActual;
             m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
         }else{
             A_Ocupado = false;
-            m_A_seLibera = infinity;
+            m_A_seLibera = INFINITY;
         }
     }
 }
@@ -194,45 +199,51 @@ void Paso_Mensajes::A_recibeACK()
 {
     m_reloj = m_A_recibeACK;
     qDebug()<<"Recibi un ACK que es: "<<QString::number(ACK, 10);
-    mensaje mensajeTmp = ventana.front();
+    mensaje mensajeTmp = ventana[0];
     int count = 0;
     while(mensajeTmp.numSecuencia < ACK && !ventana.empty()){
         ventana.erase(ventana.begin());
-        mensajeTmp = ventana.front();
         colaTimer.erase(colaTimer.begin());
-        colaB.erase(colaB.begin());
+        if(!ventana.empty()){
+            mensajeTmp = ventana[0];
+        }
+        if(!colaTimer.empty()){
+            m_expiraTTL = colaTimer[0];
+        }
         ++count;
-        m_expiraTTL = colaTimer.front();
         qDebug()<<"Va a expirar el timer en el segundo: "<<QString::number(m_expiraTTL, 'g', 5);
     }
-    for(int i=0; i<count; ++i){
-        mensaje msjTemp = colaA.front();
+    for(int i=0; i<count && !colaA.empty() && ventana.size() < 8; ++i){
+        mensaje msjTemp = colaA[i];
         msjTemp.venceTimer = m_reloj + m_timer;
         colaTimer.push_back(m_reloj+m_timer);
-        msjTemp.seEnvio = true;
-        ventana.push_back(colaA.front());
+        msjTemp.seEnvio = false;
+        ventana.push_back(msjTemp);
         colaA.erase(colaA.begin());
     }
-    m_A_recibeACK = infinity;
+    m_A_recibeACK = INFINITY;
 }
 
 void Paso_Mensajes::expiraTTL()
 {
     m_reloj = m_expiraTTL;
     qDebug()<<"Ocurrio expiraTTL() y estoy en el ciclo "<<QString::number(m_reloj,  'g', 5);
-    mensaje mensajeTmp = ventana.front();
-    if(mensajeTmp.venceTimer == colaTimer.front()){     //Expira el timer del primer elemento
-        colaTimer.clear();
-        for(int i=0; i<8; ++i){
-            mensajeTmp = ventana[i];
-            mensajeTmp.venceTimer = m_reloj + (i+1)*m_timer;
-            colaTimer.push_back(mensajeTmp.venceTimer);
-            mensajeTmp.seEnvio = false;
-            ventana[i] = mensajeTmp;
+    if(!ventana.empty()){
+        mensaje mensajeTmp = ventana.front();
+        if(mensajeTmp.venceTimer == colaTimer.front()){     //Expira el timer del primer elemento
+            colaTimer.clear();
+            for(int i=0; i<ventana.size(); ++i){
+                mensajeTmp = ventana[i];
+                mensajeTmp.venceTimer = m_reloj + (i+1)*m_timer;
+                mensajeTmp.seEnvio = false;
+                ventana[i] = mensajeTmp;
+                colaTimer[i] = mensajeTmp.venceTimer;
+            }
+            m_expiraTTL = colaTimer[0];
         }
-        m_expiraTTL = colaTimer.front();
+    }else{
+        m_expiraTTL = INFINITY;
     }
-
 }
 
 void Paso_Mensajes::B_recibeFrame()
@@ -246,29 +257,29 @@ void Paso_Mensajes::B_recibeFrame()
         double varAleatoria = sqrt(5*aleat-4);
         m_B_seLibera = m_reloj + varAleatoria + 0.25;
     }
-    m_B_recibeFrame = infinity;
+    m_B_recibeFrame = INFINITY;
 }
 
 void Paso_Mensajes::B_seLibera()
 {
     m_reloj = m_B_seLibera;
     m_datosCPUB += "Ultimo ACK enviado por B --> ";
-    frame frame_tmp = colaB.front();
+    frame frame_tmp = colaB[0];
     if(frame_tmp.numSecuencia == mensajeActual){    //es el que corresponde?
         if(frame_tmp.error){    //viene con error?
             ACK = frame_tmp.numSecuencia;
-            m_datosCPUB += ACK+'\n';
+            m_datosCPUB += QString::number(ACK, 10)+"\n";
             colaB.erase(colaB.begin());
         }else{
             ACK = frame_tmp.numSecuencia+1;
             ++m_recibidosCorrectosB;
-            m_datosCPUB += ACK+'\n';
+            m_datosCPUB += QString::number(ACK, 10)+"\n";
             ui->resultB->setText("Total de frames recibidos correctamente: "+QString::number(m_recibidosCorrectosB, 10)+'\n');
             colaB.erase(colaB.begin());
         }
     }else{
         ACK = mensajeActual;
-        m_datosCPUB += ACK+'\n';
+        m_datosCPUB += QString::number(ACK, 10)+"\n";
         colaB.erase(colaB.begin());
     }
     ui->resultB->setText(m_datosCPUB);
@@ -282,7 +293,7 @@ void Paso_Mensajes::B_seLibera()
         m_B_seLibera = m_reloj + varAleatoria + 0.25;
     }else{
         B_Ocupado = false;
-        m_B_seLibera = infinity;
+        m_B_seLibera = INFINITY;
     }
 }
 

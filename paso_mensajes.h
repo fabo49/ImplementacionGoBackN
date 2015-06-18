@@ -50,7 +50,8 @@ public:
 
 private slots:
     void on_btnStart_clicked();
-
+signals:
+    void cambiaReloj(QString newReloj);
 private:
     void correSimulacion();
     void A_recibeMensaje();
@@ -92,8 +93,6 @@ private:
     int mensajeActual;
 
     int ACK;
-
-    double infinity;
 
     //Estadisticas
 

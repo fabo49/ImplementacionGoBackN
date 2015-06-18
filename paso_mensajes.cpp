@@ -22,6 +22,9 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
     m_timer = 0.0;
     m_modoLento = false;
     m_reloj = 0.0;
+    ACK = -1;
+
+    totMensajesRecibidos = 0;
 
     A_Ocupado = false;
     B_Ocupado = false;
@@ -102,98 +105,105 @@ void Paso_Mensajes::correSimulacion()
 void Paso_Mensajes::A_recibeMensaje()
 {
     mensaje newMensaje;
+    newMensaje.numSecuencia = numMensajes;
+    newMensaje.seEnvio = false;
     m_reloj = m_A_recibeMensaje;    //R=LMA
+    qDebug()<<"Llego un mensaje a A";
+    ++totMensajesRecibidos;
     m_expiraTTL = m_reloj + m_timer;
     colaTimer.push_back(m_expiraTTL);
-    while(ventana.size()<8){    //Hay campo en la ventana?
-        newMensaje.numSecuencia = numMensajes;
-        newMensaje.seEnvio = false;
+    if(ventana.size()<8){    //Hay campo en la ventana?
+        qDebug()<<"Se pone mensaje en la ventana.";
         newMensaje.venceTimer = m_expiraTTL;
         ventana.push_back(newMensaje);
         if(A_Ocupado == false){     //preparaFrame() esta libre?
+            qDebug()<<"A_seLibera() esta libre, entonces lo programo";
             A_Ocupado = true;
             srand(time(NULL));
-            double num = rand()/RAND_MAX;   //numero entre 0-1
+            double num = (rand()%100)*0.01;                 //numero entre 0-1
             double varAleatoria = -(1/0.5)*(log(1-num)); //crea la variable aleatoria con dist. exponencial, parametro 1/2
             mensaje msjTmp = ventana.front();
             mensajeActual = msjTmp.numSecuencia;
             m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
         }
-        ++numMensajes;
-    }
-    if(colaA.size() >= 8){  //si ya no hay campo en la ventana
-        newMensaje.numSecuencia = numMensajes;
-        newMensaje.seEnvio = false;
+    }else{  //si ya no hay campo en la ventana
+        qDebug()<<"Se pone mensaje en la cola de A.";
         colaA.push_back(newMensaje);
-        ++numMensajes;
     }
-    ui->resultA->setText("Mensajes recibidos: "+QString::number(colaA.size()));
-    QString mensajeTmp = "Mensajes recibidos: "+QString::number(colaA.size());
+    ++numMensajes;
+    ui->resultA->setText("Mensajes recibidos: "+QString::number(totMensajesRecibidos, 10));
+    QString mensajeTmp = "Mensajes recibidos: "+QString::number(totMensajesRecibidos, 10);
     qDebug()<<mensajeTmp;
 
     srand(time(NULL));
-    double r1 = rand()/RAND_MAX;
+    double r1 = (rand()%100)*0.01;
     srand(time(NULL));
-    double r2 = rand()/RAND_MAX;
+    double r2 = (rand()%100)*0.01;
     double varAleatoria = 25 + pow((-2*log(r1)), 1/2)*sin(2*M_PI*r2);    //tiempo de arribo con distribucion n(25, 1).
     m_A_recibeMensaje = m_reloj + varAleatoria;     //programa cuando va a arribar el siguiente mensaje
-    QString reloj = QString::number(m_reloj);
+    QString reloj = QString::number(m_reloj, 'g', 5);
     ui->labelReloj->setText(reloj);  //indica en la interfaz cual es el reloj
-    qDebug()<<"El reloj actual es: "+QString::number(m_reloj);
+    qDebug()<<"El reloj actual es: "<<QString::number(m_reloj, 'g', 5);
 }
 
 void Paso_Mensajes::A_seLibera()
 {
     m_reloj = m_A_seLibera; //R = SLA
-    qDebug()<<"El reloj actual es: "+QString::number(m_reloj);
-    m_B_recibeFrame = m_reloj + 1;
+    qDebug()<<"Entro a A_seLibera()";
+    int posMensaje = getMsjFaltante();
+    if(posMensaje != -1){       //Si es -1 significa que todos los de la vantana se enviaron
+        frame newFrame;
+        mensaje msjTemp = ventana[posMensaje];
+        msjTemp.seEnvio = true;
+        ventana[posMensaje] = msjTemp;
+        newFrame.numSecuencia = msjTemp.numSecuencia;
 
-    frame newFrame;
-    mensaje msjTemp = ventana.front();
-    msjTemp.seEnvio = true;
-    ventana.erase(ventana.begin());
-    ventana.insert(ventana.begin(), msjTemp);
-    newFrame.numSecuencia = msjTemp.numSecuencia;
-    srand(time(NULL));
-    if((rand()%100+1) <= 10){        //probabilidad 0.1 de que el mensaje vaya con error
-        newFrame.error = true;
-    }else{
-        newFrame.error = false;
-    }
-    srand(time(NULL));
-    if((rand()%100+1) <=5){      //probabilidad de 0.05 de que el mensaje se pierda
-
-    }else{
-        //programa el evento B_recibeFrame
-        m_B_recibeFrame = m_reloj + 1;  //BRF = R+1
-        colaB.push_back(newFrame);   //"lo pone en linea"
-    }
-    //luego hay que revisar si hay algo en la ventana
-    if(!ventana.empty()){
         srand(time(NULL));
-        int r = rand()/RAND_MAX;        //numero entre 0-1
-        double varAleatoria = (-1/0.5)*log(1-r);  //crea la variable aleatoria con dist. exponencial, parametro 1/2
-        ++mensajeActual;
-        m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
-    }else{
-        A_Ocupado = false;
-        m_A_seLibera = infinity;
-    }
+        if((rand()%100+1) <= 10){        //probabilidad 0.1 de que el mensaje vaya con error
+            newFrame.error = true;
+            qDebug()<<"Se envia un frame con error";
+        }else{
+            newFrame.error = false;
+            qDebug()<<"Se envia un frame sin error (No hay error)";
+        }
+        srand(time(NULL));
+        if((rand()%100+1) <=5){      //probabilidad de 0.05 de que el mensaje se pierda
+            qDebug()<<"Se va a perder el mensaje --> no se programa m_B_recibeFrame()";
+        }else{
+            //programa el evento B_recibeFrame
+            m_B_recibeFrame = m_reloj + 1;  //BRF = R+1
+            colaB.push_back(newFrame);   //"lo pone en linea"
+        }
 
+        int quedaAlguien = getMsjFaltante();
+        if(quedaAlguien != -1){     //Queda alguien en la ventana?
+            qDebug()<<"Estoy en A_seLibera() y todavia hay gente en la ventana";
+            srand(time(NULL));
+            int r = (rand()%100)*0.01;        //numero entre 0-1
+            double varAleatoria = (-1/0.5)*log(1-r);  //crea la variable aleatoria con dist. exponencial, parametro 1/2
+            ++mensajeActual;
+            m_A_seLibera = m_reloj + varAleatoria + 1;    //programa el evento Liberar A
+        }else{
+            A_Ocupado = false;
+            m_A_seLibera = infinity;
+        }
+    }
 }
 
 void Paso_Mensajes::A_recibeACK()
 {
     m_reloj = m_A_recibeACK;
+    qDebug()<<"Recibi un ACK que es: "<<QString::number(ACK, 10);
     mensaje mensajeTmp = ventana.front();
     int count = 0;
-    while(ACK > mensajeTmp.numSecuencia && !ventana.empty()){
+    while(mensajeTmp.numSecuencia < ACK && !ventana.empty()){
         ventana.erase(ventana.begin());
         mensajeTmp = ventana.front();
         colaTimer.erase(colaTimer.begin());
         colaB.erase(colaB.begin());
         ++count;
         m_expiraTTL = colaTimer.front();
+        qDebug()<<"Va a expirar el timer en el segundo: "<<QString::number(m_expiraTTL, 'g', 5);
     }
     for(int i=0; i<count; ++i){
         mensaje msjTemp = colaA.front();
@@ -209,9 +219,18 @@ void Paso_Mensajes::A_recibeACK()
 void Paso_Mensajes::expiraTTL()
 {
     m_reloj = m_expiraTTL;
+    qDebug()<<"Ocurrio expiraTTL() y estoy en el ciclo "<<QString::number(m_reloj,  'g', 5);
     mensaje mensajeTmp = ventana.front();
-    if(mensajeTmp.venceTimer == colaTimer.front()){
-
+    if(mensajeTmp.venceTimer == colaTimer.front()){     //Expira el timer del primer elemento
+        colaTimer.clear();
+        for(int i=0; i<8; ++i){
+            mensajeTmp = ventana[i];
+            mensajeTmp.venceTimer = m_reloj + (i+1)*m_timer;
+            colaTimer.push_back(mensajeTmp.venceTimer);
+            mensajeTmp.seEnvio = false;
+            ventana[i] = mensajeTmp;
+        }
+        m_expiraTTL = colaTimer.front();
     }
 
 }
@@ -219,18 +238,15 @@ void Paso_Mensajes::expiraTTL()
 void Paso_Mensajes::B_recibeFrame()
 {
     m_reloj = m_B_recibeFrame;
+    qDebug()<<"Ocurre B_recibeFrame() en el tiempo: "<<QString::number(m_reloj,  'g', 5);
     if(!B_Ocupado && !colaB.empty()){ //el proceso esta libre -- ademas preguntar si la cola de B esta vacia
         B_Ocupado = true;
         srand (time(NULL));
-        double aleat = rand() % 2 + 2;  //numero 2<=x<=3
-        double varAleatoria = (pow(aleat, 2.0)-4)/5;
+        double aleat = ((rand() % 100)*0.01)+2;  //numero 2<=x<=3
+        double varAleatoria = sqrt(5*aleat-4);
         m_B_seLibera = m_reloj + varAleatoria + 0.25;
     }
-    /*
-    else{
-        deja el frame en la cola
-    }
-    */
+    m_B_recibeFrame = infinity;
 }
 
 void Paso_Mensajes::B_seLibera()
@@ -247,7 +263,7 @@ void Paso_Mensajes::B_seLibera()
             ACK = frame_tmp.numSecuencia+1;
             ++m_recibidosCorrectosB;
             m_datosCPUB += ACK+'\n';
-            ui->resultB->setText("Total de frames recibidos correctamente: "+QString::number(m_recibidosCorrectosB)+'\n');
+            ui->resultB->setText("Total de frames recibidos correctamente: "+QString::number(m_recibidosCorrectosB, 10)+'\n');
             colaB.erase(colaB.begin());
         }
     }else{
@@ -270,48 +286,63 @@ void Paso_Mensajes::B_seLibera()
     }
 }
 
+int Paso_Mensajes::getMsjFaltante()
+{
+    int index = 0;
+    while(index< ventana.size()){
+        mensaje msj_temp = ventana[index];
+        if(msj_temp.seEnvio == false){
+            return index;
+        }
+        ++index;
+    }
+    return -1;
+}
+
 void Paso_Mensajes::sigEvento()
 {
     double vecTimes[] ={m_A_recibeMensaje, m_A_seLibera, m_B_seLibera, m_B_recibeFrame, m_A_recibeACK, m_expiraTTL};
-    // Busca el de menor tiempo
-    double min = vecTimes[0];
+    std::list<double> lista;
     for(int i=0; i<6; ++i){
-        for(int j=i+1; j<6; ++j){
-            if(vecTimes[j]<min){
-                min = vecTimes[j];
-            }
-        }
+        lista.push_back(vecTimes[i]);
     }
+    lista.sort();
+    double tiempMin = lista.front();
     m_eventoCorriendo += "Evento que se esta procesando -> ";
-    if(min == m_A_recibeMensaje){
+    if(tiempMin == m_A_recibeMensaje){
         m_eventoCorriendo += "A recibe mensaje.\n";
         ui->resultadosFinales->setText(m_eventoCorriendo);
         A_recibeMensaje();
-    }
-    if(min == m_A_seLibera){
-        m_eventoCorriendo += "A se libera.\n";
-        ui->resultadosFinales->setText(m_eventoCorriendo);
-        A_seLibera();
-    }
-    if(min == m_B_seLibera){
-        m_eventoCorriendo += "B se libera.\n";
-        ui->resultadosFinales->setText(m_eventoCorriendo);
-        B_seLibera();
-    }
-    if(min == m_B_recibeFrame){
-        m_eventoCorriendo += "B recibe frame.\n";
-        ui->resultadosFinales->setText(m_eventoCorriendo);
-        B_recibeFrame();
-    }
-    if(min == m_A_recibeACK){
-        m_eventoCorriendo += "A recibe ACK.\n";
-        ui->resultadosFinales->setText(m_eventoCorriendo);
-        A_recibeACK();
-    }
-    if(min == m_expiraTTL){
-        m_eventoCorriendo += "Expira TTL.\n";
-        ui->resultadosFinales->setText(m_eventoCorriendo);
-        expiraTTL();
-    }
+    }else{
 
+        if(tiempMin == m_A_seLibera){
+            m_eventoCorriendo += "A se libera.\n";
+            ui->resultadosFinales->setText(m_eventoCorriendo);
+            A_seLibera();
+        }else{
+            if(tiempMin == m_B_seLibera){
+                m_eventoCorriendo += "B se libera.\n";
+                ui->resultadosFinales->setText(m_eventoCorriendo);
+                B_seLibera();
+            }else{
+                if(tiempMin == m_B_recibeFrame){
+                    m_eventoCorriendo += "B recibe frame.\n";
+                    ui->resultadosFinales->setText(m_eventoCorriendo);
+                    B_recibeFrame();
+                }else{
+                    if(tiempMin == m_A_recibeACK){
+                        m_eventoCorriendo += "A recibe ACK.\n";
+                        ui->resultadosFinales->setText(m_eventoCorriendo);
+                        A_recibeACK();
+                    }else{
+                        if(tiempMin == m_expiraTTL){
+                            m_eventoCorriendo += "Expira TTL.\n";
+                            ui->resultadosFinales->setText(m_eventoCorriendo);
+                            expiraTTL();
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

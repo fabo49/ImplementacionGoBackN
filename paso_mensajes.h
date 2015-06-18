@@ -21,6 +21,7 @@
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
 #include <math.h>
+#include <list>
 
 
 struct frame{
@@ -59,6 +60,8 @@ private:
     void B_recibeFrame();
     void B_seLibera();
 
+    int getMsjFaltante();
+
     void sigEvento();
 
     Ui::Paso_Mensajes *ui;
@@ -68,6 +71,8 @@ private:
     double m_maxTime;
     double m_timer;
     bool m_modoLento;
+
+    int totMensajesRecibidos;
 
     double m_A_recibeMensaje;
     double m_A_seLibera;

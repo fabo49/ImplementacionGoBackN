@@ -48,7 +48,9 @@ Paso_Mensajes::Paso_Mensajes(QWidget *parent) :
     m_B_recibeFrame = INFINITY;
     m_B_seLibera = INFINITY;
 
-    connect(this, SIGNAL(cambiaReloj(QString)),ui->labelReloj, SLOT(setText(QString)));
+    ui->progressBar->setValue(0);
+
+    connect(this, SIGNAL(avance(int)), ui->progressBar, SLOT(setValue(int)));
 
 }
 
@@ -104,7 +106,6 @@ void Paso_Mensajes::correSimulacion()
             }
         }
         qDebug()<<"----- Termine la corrida "<<QString::number(i);
-        m_relojTotal += m_reloj;
         m_datosCPUA += "- Total de mensajes recibidos: "+QString::number(totMensajesRecibidos, 10)+'\n';
 
         double promColaA = 0;
@@ -142,12 +143,15 @@ void Paso_Mensajes::correSimulacion()
         clear();
         ui->resultA->setText(m_datosCPUA);
         ui->resultB->setText(m_datosCPUB);
+
+        int progreso = ((i+1)*100)/m_numVeces;
+        emit avance(progreso);
+        QApplication::processEvents();
     }
     double promColaA = 0;
     for(int i=0; i<promTotalColaA.size(); ++i){
         promColaA += promTotalColaA[i];
     }
-    ui->labelReloj->setText(QString::number(m_relojTotal, 'g', 3));
     promColaA /= promTotalColaA.size();
     datosGenerales += "- El promedio del tamaño de la cola de A en total: "+QString::number(promColaA, 'g', 3)+'\n';
 
@@ -172,7 +176,6 @@ void Paso_Mensajes::correSimulacion()
     datosGenerales += "        * "+QString::number(tempServicio, 'g', 3)+" segundos.\n";
     double eficiencia = promTrans / tempServicio;
     datosGenerales += "- La eficiencia durante los "+QString::number(m_numVeces)+" ciclos fue de "+QString::number(eficiencia*100, 'g', 3)+"%\n";
-
     ui->resultadosFinales->setText(datosGenerales);
 }
 
@@ -180,6 +183,7 @@ void Paso_Mensajes::A_recibeMensaje()
 {
 
     m_reloj = m_A_recibeMensaje;    //R=LMA
+    updateClock();
 
     mensaje newMensaje;
     newMensaje.numSecuencia = numMensajes;
@@ -230,6 +234,7 @@ void Paso_Mensajes::A_recibeMensaje()
 void Paso_Mensajes::A_seLibera()
 {
     m_reloj = m_A_seLibera; //R = SLA
+    updateClock();
     qDebug()<<"Entro a A_seLibera()";
     srand(time(NULL));
     int posMensaje = getMsjFaltante();
@@ -277,6 +282,7 @@ void Paso_Mensajes::A_seLibera()
 void Paso_Mensajes::A_recibeACK()
 {
     m_reloj = m_A_recibeACK;
+    updateClock();
     qDebug()<<"Recibi un ACK que es: "<<QString::number(ACK, 10);
     mensaje mensajeTmp = ventana[0];
     int count = 0;
@@ -313,6 +319,7 @@ void Paso_Mensajes::A_recibeACK()
 void Paso_Mensajes::expiraTTL()
 {
     m_reloj = m_expiraTTL;
+    updateClock();
     qDebug()<<"Ocurrio expiraTTL() y estoy en el ciclo "<<QString::number(m_reloj,  'g', 5);
     if(!ventana.empty()){
         mensaje mensajeTmp = ventana.front();
@@ -335,6 +342,7 @@ void Paso_Mensajes::expiraTTL()
 void Paso_Mensajes::B_recibeFrame()
 {
     m_reloj = m_B_recibeFrame;
+    updateClock();
     qDebug()<<"Ocurre B_recibeFrame() en el tiempo: "<<QString::number(m_reloj,  'g', 5);
     if(!B_Ocupado && !colaB.empty()){ //el proceso esta libre -- ademas preguntar si la cola de B esta vacia
         B_Ocupado = true;
@@ -349,6 +357,7 @@ void Paso_Mensajes::B_recibeFrame()
 void Paso_Mensajes::B_seLibera()
 {
     m_reloj = m_B_seLibera;
+    updateClock();
     frame frame_tmp = colaB[0];
     if(frame_tmp.numSecuencia == mensajeActual){    //es el que corresponde?
         if(frame_tmp.error){    //viene con error?
@@ -453,6 +462,15 @@ void Paso_Mensajes::clear()
     m_expiraTTL = INFINITY;
     m_B_recibeFrame = INFINITY;
     m_B_seLibera = INFINITY;
+
+}
+
+void Paso_Mensajes::updateClock()
+{
+    m_relojTotal += m_reloj;
+    ui->labelReloj->setText(QString::number(m_relojTotal, 'f', 4)+
+                            " segundos.");
+    QApplication::processEvents();
 
 }
 

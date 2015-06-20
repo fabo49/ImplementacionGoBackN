@@ -78,6 +78,7 @@ private:
     int getMsjFaltante();
     void sigEvento();
     void clear();
+    void updateClock();
 
     // --------------------------------------
     // |        Miembros de la clase        |

@@ -211,6 +211,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QProgressBar" name="progressBar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -270,6 +277,13 @@
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout_simulador"/>
+   </widget>
+   <addaction name="menuAbout"/>
   </widget>
   <action name="actionDesarrolladores">
    <property name="checkable">
@@ -277,6 +291,11 @@
    </property>
    <property name="text">
     <string>Desarrolladores</string>
+   </property>
+  </action>
+  <action name="actionAbout_simulador">
+   <property name="text">
+    <string>About simulador</string>
    </property>
   </action>
  </widget>

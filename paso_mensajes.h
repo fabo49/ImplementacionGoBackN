@@ -26,16 +26,13 @@
 
 
 struct frame{
-    bool error;
-    int numSecuencia;   //va a ser el mismo que le mensaje
+    unsigned int numSecuencia;   //va a ser el mismo que el mensaje
 };
 
 struct mensaje{
     bool seEnvio;
-    int numSecuencia;
-    double venceTimer;
+    unsigned int numSecuencia;
     double tiempoArrivo;
-    double tiempoTransmision;
 };
 
 
@@ -53,7 +50,7 @@ public:
 
 private slots:
     void on_btnStart_clicked();
-    void on_btnAbout_clicked();
+    void about();
 
 signals:
     void avance(int progreso);
@@ -66,8 +63,6 @@ private:
     void correSimulacion();
     void A_recibeMensaje();
     void A_seLibera();
-    void A_recibeACK();
-    void expiraTTL();
     void B_recibeFrame();
     void B_seLibera();
 
@@ -75,10 +70,10 @@ private:
     // |        Métodos de ayuda        |
     // ----------------------------------
 
-    int getMsjFaltante();
     void sigEvento();
     void clear();
     void updateClock();
+    int getMsjFaltante();
 
     // --------------------------------------
     // |        Miembros de la clase        |
@@ -91,14 +86,11 @@ private:
     // Variables que se le solicitan al usuario
     int m_numVeces;
     double m_maxTime;
-    double m_timer;
     bool m_modoLento;
 
     // Tiempos de los eventos
     double m_A_recibeMensaje;
     double m_A_seLibera;
-    double m_A_recibeACK;
-    double m_expiraTTL;
     double m_B_recibeFrame;
     double m_B_seLibera;
 
@@ -106,33 +98,23 @@ private:
     std::vector<mensaje> colaA;
     std::vector<mensaje> ventana;
     std::vector<frame> colaB;
-    std::vector<double> colaTimer;
     std::vector<int> tamColaA;
     std::vector<double> promTotalColaA;
     std::vector<double> permanencia;
     std::vector<double> promTotalPermanencia;
-    std::vector<double> promTransmicion;
-    std::vector<double> promTotalTransmicion;
 
     // Variables auxiliares
     bool A_Ocupado;
     bool B_Ocupado;
-    int numMensajes;
-    int mensajeActual;
-    int ACK;
+    unsigned int numMensajes;
 
     // ------------------------------
     // |        Estadísticas        |
     // ------------------------------
 
-    int totMensajesRecibidos;
     double m_reloj;
     double m_relojTotal;
-    int m_totFramesB;
-    int m_longColaA;
-    int m_recibidosCorrectosB;
     QString datosGenerales;
-    QString m_datosCPUB;
     QString m_datosCPUA;
 };
 

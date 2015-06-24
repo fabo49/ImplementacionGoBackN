@@ -293,7 +293,6 @@ void Paso_Mensajes::clear()
 {
     m_reloj = 0.0;
     colaA.clear();
-    ventana.clear();
     colaB.clear();
     tamColaA.clear();
     A_Ocupado = false;

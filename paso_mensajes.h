@@ -96,7 +96,6 @@ private:
 
     //Estructuras de datos
     std::vector<mensaje> colaA;
-    std::vector<mensaje> ventana;
     std::vector<frame> colaB;
     std::vector<int> tamColaA;
     std::vector<double> promTotalColaA;

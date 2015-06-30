@@ -93,7 +93,7 @@ void Paso_Mensajes::correSimulacion()
         while(m_reloj < m_maxTime){
             sigEvento();
             if(m_modoLento){
-                QThread::msleep(80);      // hace una pausa de 1 segundo entre cada evento
+                QThread::msleep(10);      // hace una pausa de 1 segundo entre cada evento
             }
         }
         qDebug()<<"----- Termine la corrida "<<QString::number(i);
@@ -121,6 +121,7 @@ void Paso_Mensajes::correSimulacion()
         int progreso = ((i+1)*100)/m_numVeces;
         emit avance(progreso);
         QApplication::processEvents();
+        QThread::msleep(300);
     }
     double promColaA = 0;
     for(int i=0; i<promTotalColaA.size(); ++i){
@@ -308,7 +309,7 @@ void Paso_Mensajes::clear()
 void Paso_Mensajes::updateClock()
 {
     m_relojTotal += m_reloj;
-    ui->labelReloj->setText(QString::number(m_relojTotal, 'f', 3)+ " segundos.");
+    ui->labelReloj->setText(QString::number(m_reloj, 'f', 3)+ " segundos.");
     QApplication::processEvents();
 
 }

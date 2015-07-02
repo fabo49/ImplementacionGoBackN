@@ -88,6 +88,7 @@ void Paso_Mensajes::about()
 
 void Paso_Mensajes::correSimulacion()
 {
+    double promPermanencia = 0; //media
     for(int i=0; i<m_numVeces; ++i){
         m_datosCPUA += "----------- Corrida número "+QString::number(i+1)+"-----------\n";
         while(m_reloj < m_maxTime){
@@ -106,13 +107,15 @@ void Paso_Mensajes::correSimulacion()
         promTotalColaA.push_back(promColaA);
         m_datosCPUA += "- El tamaño promedio de la cola de A fue de: "+QString::number(promColaA, 'g', 3)+" mensajes\n";
 
-        double promPermanencia = 0;
+
         for(int i=0; i<permanencia.size(); ++i){
             promPermanencia += permanencia[i];
         }
         promPermanencia /= permanencia.size();
         promTotalPermanencia.push_back(promPermanencia);
         m_datosCPUA += "- El tiempo promedio de permanencia de un mensaje en el sistema fue de: "+ QString::number(promPermanencia, 'g', 3)+" segundos\n";
+
+        promPermanencia = 0;
 
         m_datosCPUA += '\n';
         clear();
@@ -130,9 +133,9 @@ void Paso_Mensajes::correSimulacion()
     promColaA /= promTotalColaA.size();
     datosGenerales += "- El promedio del tamaño de la cola de A en total: "+QString::number(promColaA, 'g', 3)+'\n';
 
-    double promPermanencia = 0;
+    promPermanencia = 0;
     for(int i=0; i<promTotalPermanencia.size(); ++i){
-        promPermanencia += promTotalPermanencia[i];
+        promPermanencia += promTotalPermanencia[i]; //individuales Yi
     }
     promPermanencia /= promTotalPermanencia.size();
     datosGenerales += "- El promedio de permanencia de un mensaje en el sistema en las "+QString::number(m_numVeces)+" corridas fue de:\n";
@@ -141,12 +144,55 @@ void Paso_Mensajes::correSimulacion()
     if(m_numVeces == 10){
         /*
          * Se calcula el intervalo de confianza con la t-student
+         *
          */
+        int gradosLibertad = 9;// 10-1
+        int sumatoria = 0;
+        int sumatoriaParcial = 0;
+        int varianza = 0;
+        int intDeConfianza1 = 0;
+        int intDeConfianza2 = 0;
+        QString intDeConfianza = "";
+
+        for (int i=0; i<9; i++){
+
+           sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
+           sumatoria = sumatoriaParcial + sumatoria;
+        }
+
+        varianza = sumatoria/gradosLibertad;
+
+        intDeConfianza1 = promPermanencia - 2.26 * pow ((varianza/10),(0,5));
+
+        intDeConfianza2 = promPermanencia + 2.26 * pow ((varianza/10),(0,5));
+
+         intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza1);
     }
     if(m_numVeces >= 50){
         /*
          * Se calcula el intervalo de confianza con la distribucion normal
          */
+        int gradosLibertad = 49;// 50-1
+        int sumatoria = 0;
+        int sumatoriaParcial = 0;
+        int varianza = 0;
+        int intDeConfianza1 = 0;
+        int intDeConfianza2 = 0;
+        QString intDeConfianza = "";
+
+        for (int i=0; i<9; i++){
+
+           sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
+           sumatoria = sumatoriaParcial + sumatoria;
+        }
+
+        varianza = sumatoria/gradosLibertad;
+
+        intDeConfianza1 = promPermanencia - 1.96 * pow ((varianza/10),(0,5));
+
+        intDeConfianza2 = promPermanencia + 1.96 * pow ((varianza/10),(0,5));
+
+        intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza1);
     }
     ui->resultadosFinales->setText(datosGenerales);
 }
@@ -184,7 +230,7 @@ void Paso_Mensajes::A_recibeMensaje()
         QThread::usleep(1);
         srand(time(NULL));
         double r2 = (rand()%100)*0.01;
-        varAleatoria = 2 + pow(0.001, 1/2)*(pow((-2*log(r1)), 1/2)*sin(2*M_PI*r2));    //tiempo de arribo con distribucion n(8, 0.001).
+        varAleatoria = 2 + pow(0.001, 1/2)*(pow((-2*log(r1)), 1/2)*sin(2*3.14*r2));    //tiempo de arribo con distribucion n(8, 0.001).
         if(varAleatoria > 0){
             funciona = true;
         }

@@ -147,11 +147,11 @@ void Paso_Mensajes::correSimulacion()
          *
          */
         int gradosLibertad = m_numVeces-1;// numVeces-1
-        int sumatoria = 0;
-        int sumatoriaParcial = 0;
-        int varianza = 0;
-        int intDeConfianza1 = 0;
-        int intDeConfianza2 = 0;
+        double sumatoria = 0;
+        double sumatoriaParcial = 0;
+        double varianza = 0;
+        double intDeConfianza1 = 0;
+        double intDeConfianza2 = 0;
         QString intDeConfianza = "";
 
         for (int i=0; i<9; i++){
@@ -175,11 +175,11 @@ void Paso_Mensajes::correSimulacion()
          * Se calcula el intervalo de confianza con la distribucion normal
          */
         int gradosLibertad = m_numVeces-1;// numVeces-1
-        int sumatoria = 0;
-        int sumatoriaParcial = 0;
-        int varianza = 0;
-        int intDeConfianza1 = 0;
-        int intDeConfianza2 = 0;
+        double sumatoria = 0;
+        double sumatoriaParcial = 0;
+        double varianza = 0;
+        double intDeConfianza1 = 0;
+        double intDeConfianza2 = 0;
         QString intDeConfianza = "";
 
         for (int i=0; i<9; i++){

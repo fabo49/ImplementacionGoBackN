@@ -146,7 +146,7 @@ void Paso_Mensajes::correSimulacion()
          * Se calcula el intervalo de confianza con la t-student
          *
          */
-        int gradosLibertad = 9;// 10-1
+        int gradosLibertad = m_numVeces-1;// numVeces-1
         int sumatoria = 0;
         int sumatoriaParcial = 0;
         int varianza = 0;
@@ -156,8 +156,8 @@ void Paso_Mensajes::correSimulacion()
 
         for (int i=0; i<9; i++){
 
-           sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
-           sumatoria = sumatoriaParcial + sumatoria;
+            sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
+            sumatoria = sumatoriaParcial + sumatoria;
         }
 
         varianza = sumatoria/gradosLibertad;
@@ -166,13 +166,15 @@ void Paso_Mensajes::correSimulacion()
 
         intDeConfianza2 = promPermanencia + 2.26 * pow ((varianza/10),(0,5));
 
-         intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza1);
+        intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza2);
+        datosGenerales += "- El intervalo de confianza es ["+intDeConfianza+"]\n";
     }
+
     if(m_numVeces >= 50){
         /*
          * Se calcula el intervalo de confianza con la distribucion normal
          */
-        int gradosLibertad = 49;// 50-1
+        int gradosLibertad = m_numVeces-1;// numVeces-1
         int sumatoria = 0;
         int sumatoriaParcial = 0;
         int varianza = 0;
@@ -182,8 +184,8 @@ void Paso_Mensajes::correSimulacion()
 
         for (int i=0; i<9; i++){
 
-           sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
-           sumatoria = sumatoriaParcial + sumatoria;
+            sumatoriaParcial = pow((promTotalPermanencia[i] - promPermanencia) , 2);
+            sumatoria = sumatoriaParcial + sumatoria;
         }
 
         varianza = sumatoria/gradosLibertad;
@@ -192,7 +194,8 @@ void Paso_Mensajes::correSimulacion()
 
         intDeConfianza2 = promPermanencia + 1.96 * pow ((varianza/10),(0,5));
 
-        intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza1);
+        intDeConfianza = QString::number(intDeConfianza1) + " , " + QString::number(intDeConfianza2);
+        datosGenerales += "- El intervalo de confianza es ["+intDeConfianza+"]\n";
     }
     ui->resultadosFinales->setText(datosGenerales);
 }

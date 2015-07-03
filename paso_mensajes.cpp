@@ -165,11 +165,9 @@ void Paso_Mensajes::correSimulacion()
         varianza = sumatoria/gradosLibertad;
         qDebug()<<"La varianza es: "+ QString::number(varianza, 'f', 3);
 
-        intDeConfianza1 = promPermanencia - 2.26 * sqrt((varianza/10.0));
-        qDebug()<<"La varianza /10: "+QString::number((varianza/10.0), 'f', 3);
-        qDebug()<<"pow(varianza/10, 0.5): "+ QString::number(sqrt((varianza/10.0)), 'f', 3);
+        intDeConfianza1 = promPermanencia - 2.26 * sqrt((varianza/m_numVeces));
 
-        intDeConfianza2 = promPermanencia + 2.26 * sqrt((varianza/10.0));
+        intDeConfianza2 = promPermanencia + 2.26 * sqrt((varianza/m_numVeces));
 
         intDeConfianza = QString::number(intDeConfianza1, 'f', 4) + " , " + QString::number(intDeConfianza2, 'f', 4);
         datosGenerales += "- El intervalo de confianza es ["+intDeConfianza+"]\n";
@@ -195,9 +193,9 @@ void Paso_Mensajes::correSimulacion()
 
         varianza = sumatoria/gradosLibertad;
 
-        intDeConfianza1 = promPermanencia - 1.96 * sqrt((varianza/10.0));
+        intDeConfianza1 = promPermanencia - 1.96 * sqrt((varianza/m_numVeces));
 
-        intDeConfianza2 = promPermanencia + 1.96 * sqrt((varianza/10.0));
+        intDeConfianza2 = promPermanencia + 1.96 * sqrt((varianza/m_numVeces));
 
         intDeConfianza = QString::number(intDeConfianza1, 'f', 4) + " , " + QString::number(intDeConfianza2, 'f', 4);
         datosGenerales += "- El intervalo de confianza es ["+intDeConfianza+"]\n";
